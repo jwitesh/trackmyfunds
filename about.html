@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackMyFunds</title>
+    <link rel="stylesheet" href="about.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <h1>TrackMyFunds</h1>
+        </div>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#login">Login</a>
+            <button class="signup-btn">Sign Up</button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <h2>Track and Manage Your Finances with Ease</h2>
+        <p>Stay in control of your spending, income, and savings.</p>
+        <button class="cta-btn" onclick="viewReports()">View Reports</button>
+        <img src="dashboard-preview.png" alt="Dashboard Preview" class="dashboard-preview">
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h3>Key Features</h3>
+        <div class="feature-box">
+            <img src="feature-icon1.png" alt="Feature Icon">
+            <a href="investment.html" ><h4>Investment</h4></a>
+            <p>We will assist you to where should you invest</p>
+        </div>
+        <div class="feature-box">
+            <img src="feature-icon2.png" alt="Feature Icon">
+            <a href="chart.html"><h4>Expense Categorization</h4></a>
+            <p>Organize your spending into categories.</p>
+        </div>
+        <div class="feature-box">
+            <img src="feature-icon3.png" alt="Feature Icon">
+           <a href="reports.html"><h4>Reports & Insights</h4></a>
+            <p>Track trends and improve your financial habits.</p>
+        </div>
+    </section>
+ 
+   
+
+    <!-- Reports Section -->
+    <section id="reportContainer" style="display: none;">
+        <h3>Saved Reports</h3>
+        <div id="reportsList"></div>
+        <button onclick="backToInput()">Back to Input</button>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 TrackMyFunds | Privacy Policy | Terms of Service</p>
+    </footer>
+
+    <script>
+        // Function to store chart data in localStorage
+        function storeChartData(salary, data, labels, remainingBalance) {
+            const chartData = {
+                salary: salary,
+                data: data,
+                labels: labels,
+                remainingBalance: remainingBalance,
+                date: new Date().toLocaleString() // Save the date and time of report generation
+            };
+            
+            // Retrieve existing saved reports from localStorage or initialize an empty array if none exist
+            let savedCharts = JSON.parse(localStorage.getItem('savedCharts')) || [];
+            
+            // Add the new chart data to the saved reports
+            savedCharts.push(chartData);
+            
+            // Save the updated reports list back to localStorage
+            localStorage.setItem('savedCharts', JSON.stringify(savedCharts));
+        }
+
+        // Function to view saved reports
+        function viewReports() {
+            const reportsContainer = document.getElementById('reportContainer');
+            const reportsList = document.getElementById('reportsList');
+            
+            // Retrieve saved reports from localStorage
+            const savedCharts = JSON.parse(localStorage.getItem('savedCharts')) || [];
+            
+            // Check if there are any saved reports
+            if (savedCharts.length === 0) {
+                reportsList.innerHTML = '<p>No saved reports available.</p>';
+            } else {
+                // Iterate over the saved reports and display them
+                reportsList.innerHTML = savedCharts.map(chart => `
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Date:</strong> ${chart.date}</p>
+                        <p><strong>Salary:</strong> $${chart.salary}</p>
+                        <p><strong>Remaining Balance:</strong> $${chart.remainingBalance}</p>
+                        <p><strong>Expenses:</strong></p>
+                        <ul>
+                            ${chart.labels.map((label, index) => `<li>${label}: $${chart.data[index]}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            }
+
+            // Switch to the reports view (hide input/chart view, show report view)
+            document.getElementById('inputContainer').style.display = 'none';
+            reportsContainer.style.display = 'block';
+        }
+
+        // Function to go back to input view
+        function backToInput() {
+            // Show input form, hide chart and report sections
+            document.getElementById('inputContainer').style.display = 'block';
+            document.getElementById('reportContainer').style.display = 'none';
+        }
+
+        // Data Storage for Transactions
+        const transactions = [];
+
+        // Function to add a transaction
+        function addTransaction(type, amount) {
+            transactions.push({ type, amount: parseFloat(amount) });
+            updateDashboard();
+        }
+
+        // Function to calculate total income, expenses, and balance
+        function calculateTotals() {
+            let income = 0;
+            let expenses = 0;
+
+            transactions.forEach(transaction => {
+                if (transaction.type === 'income') {
+                    income += transaction.amount;
+                } else {
+                    expenses += transaction.amount;
+                }
+            });
+
+            return { income, expenses, balance: income - expenses };
+        }
+
+        // Function to update the dashboard
+        function updateDashboard() {
+            const totals = calculateTotals();
+            // Update the display with totals (you can customize this as needed)
+            console.log(`Income: $${totals.income}, Expenses: $${totals.expenses}, Balance: $${totals.balance}`);
+        }
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            const type = document.getElementById('transactionType').value.toLowerCase();
+            const amount = document.getElementById('transactionAmount').value;
+
+            // Check if type is valid
+            if (type === 'income' || type === 'expense') {
+                addTransaction(type, amount);
+                // Optionally, store the data
+                storeChartData(5000, [amount], [type], 5000 - amount); // Example values
+                alert('Transaction added successfully!');
+            } else {
+                alert('Please enter a valid transaction type (Income or Expense).');
+            }
+
+            // Clear the form
+            document.getElementById('transactionType').value = '';
+            document.getElementById('transactionAmount').value = '';
+        }
+
+        // Function to show expense categorization and view reports
+        function showExpenseCategorization() {
+            // This function can be expanded to show expense categorization features
+            alert('This feature is coming soon!');
+            viewReports(); // Call the function to view saved reports
+        }
+    </script>
+</body>
+</html>
